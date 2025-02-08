@@ -11,7 +11,6 @@ const getAuthHeaders = () => {
 
 // Function to handle API errors
 const handleApiError = (error) => {
-  //   console.error('API Error:', error?.response?.data || error.message);
   throw new Error('An error occurred while communicating with the API');
 };
 
@@ -22,7 +21,6 @@ export const _fetch = async (endpoint, params = {}) => {
       headers: getAuthHeaders(),
       params,
     });
-    console.log(response);
     return response.data;
   } catch (error) {
     handleApiError(error);
@@ -35,33 +33,36 @@ export const _create = async (endpoint, postData) => {
     const response = await axios.post(`${BASE_URL}${endpoint}`, postData, {
       headers: getAuthHeaders(),
     });
-    console.log(response);
     return response.data;
   } catch (error) {
     handleApiError(error);
   }
 };
 
-// Function to make a PUT request
-export const _update = async (endpoint, updateData) => {
+// Function to make a PUT request with dynamic ID and update data
+export const _update = async (endpoint, id, updateData) => {
   try {
-    const response = await axios.put(`${BASE_URL}${endpoint}`, updateData, {
+    const url = `${BASE_URL}${endpoint.replace(':id', id)}`;
+
+    const response = await axios.put(url, updateData, {
       headers: getAuthHeaders(),
     });
-    console.log(response);
+
     return response.data;
   } catch (error) {
     handleApiError(error);
   }
 };
 
-// Function to make a DELETE request
-export const _delete = async (endpoint) => {
+// Function to make a DELETE request with dynamic ID
+export const _delete = async (endpoint, id) => {
   try {
-    const response = await axios.delete(`${BASE_URL}${endpoint}`, {
+    const url = `${BASE_URL}${endpoint.replace(':id', id)}`;
+
+    const response = await axios.delete(url, {
       headers: getAuthHeaders(),
     });
-    console.log(response);
+
     return response.data;
   } catch (error) {
     handleApiError(error);

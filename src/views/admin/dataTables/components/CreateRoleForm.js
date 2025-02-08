@@ -12,17 +12,28 @@ import {
   FormLabel,
   Checkbox,
   VStack,
-  Text,
+  useToast,
 } from '@chakra-ui/react';
 
-import React, { useState } from 'react';
-import { _create } from 'components/utils/apiUtils';
+import React from 'react';
+import { Formik, Field, Form } from 'formik';
+import * as Yup from 'yup';
+import { _create, _update } from 'components/utils/apiUtils';
 
-export default function CreateRoleForm({ isOpen, onClose }) {
-  // ✅ Fix: Accept props from parent
-  const [roleName, setRoleName] = useState('');
-  const [description, setDescription] = useState('');
-  const [selectedPermissions, setSelectedPermissions] = useState([]);
+const validationSchema = Yup.object({
+  roleName: Yup.string().required('Role name is required'),
+  description: Yup.string().required('Description is required'),
+  permissions: Yup.array().min(1, 'At least one permission is required'),
+});
+
+const CreateRoleForm = ({
+  isOpen,
+  onClose,
+  editedRole,
+  setEditedRole,
+  setRoles,
+}) => {
+  const toast = useToast();
 
   const permissions = [
     'create',
@@ -32,83 +43,122 @@ export default function CreateRoleForm({ isOpen, onClose }) {
     'block',
     'unblock',
   ];
+  const isEditing = !!editedRole;
 
-  // Handle permission checkbox change
-  const handlePermissionChange = (e) => {
-    const { name, checked } = e.target;
-    setSelectedPermissions((prev) =>
-      checked ? [...prev, name] : prev.filter((perm) => perm !== name),
-    );
-  };
-
-  // Handle form submission
-  const handleCreateRole = async () => {
-    const roleData = {
-      name: roleName,
-      description,
-      permissions: selectedPermissions,
-    };
-
+  const handleSubmit = async (values) => {
     try {
-      const response = await _create('/api/roles', roleData);
-      console.log(response);
-      alert('Role created successfully!');
-      onClose(); // ✅ Fix: Close modal after success
+      if (isEditing) {
+        await _update(`/api/roles/${editedRole._id}`, values);
+        setRoles((prevRoles) =>
+          prevRoles.map((role) =>
+            role._id === editedRole._id ? { ...role, ...values } : role,
+          ),
+        );
+        toast({
+          title: 'Role updated.',
+          description: 'The role has been successfully updated.',
+          status: 'success',
+          duration: 5000,
+          isClosable: true,
+        });
+      } else {
+        const newRole = await _create('/api/roles', values);
+        setRoles((prevRoles) => [...prevRoles, newRole]);
+        toast({
+          title: 'Role created.',
+          description: 'A new role has been successfully created.',
+          status: 'success',
+          duration: 5000,
+          isClosable: true,
+        });
+      }
+      onClose();
+      setEditedRole(null);
     } catch (error) {
-      console.error('Error creating role:', error);
-      alert('Failed to create role.');
+      console.error('Error saving role:', error);
+      toast({
+        title: 'Operation failed.',
+        description: 'Something went wrong. Try again.',
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      });
     }
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose}>
-      {' '}
-      {/* ✅ Fix: Use isOpen */}
+    <Modal
+      isOpen={isOpen}
+      onClose={() => {
+        onClose();
+        setEditedRole(null);
+      }}
+    >
       <ModalOverlay />
       <ModalContent>
-        <ModalHeader>Create New Role</ModalHeader>
-        <Text fontSize="sm" color="gray.500" mb={2} px={6}>
-          Define a new role and its permissions
-        </Text>
-        <ModalCloseButton />
-        <ModalBody>
-          <FormControl mb={4}>
-            <FormLabel>Role Name</FormLabel>
-            <Input
-              value={roleName}
-              onChange={(e) => setRoleName(e.target.value)}
-            />
-          </FormControl>
-          <FormControl mb={4}>
-            <FormLabel>Description</FormLabel>
-            <Input
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-            />
-          </FormControl>
-          <FormControl>
-            <FormLabel>User Management</FormLabel>
-            <VStack align="start">
-              {permissions.map((permission) => (
-                <Checkbox
-                  key={permission}
-                  name={permission}
-                  isChecked={selectedPermissions.includes(permission)}
-                  onChange={handlePermissionChange}
+        <ModalHeader>{isEditing ? 'Edit Role' : 'Create New Role'}</ModalHeader>
+        <Formik
+          initialValues={{
+            roleName: editedRole?.title || '',
+            description: editedRole?.description || '',
+            permissions: editedRole?.userPermissions || [],
+          }}
+          validationSchema={validationSchema}
+          onSubmit={handleSubmit}
+        >
+          {({ values, setFieldValue }) => (
+            <Form>
+              <ModalBody>
+                <FormControl mb={4}>
+                  <FormLabel>Role Name</FormLabel>
+                  <Field as={Input} name="roleName" />
+                </FormControl>
+                <FormControl mb={4}>
+                  <FormLabel>Description</FormLabel>
+                  <Field as={Input} name="description" />
+                </FormControl>
+                <FormControl>
+                  <FormLabel>Permissions</FormLabel>
+                  <VStack align="start">
+                    {permissions.map((perm) => (
+                      <Checkbox
+                        key={perm}
+                        value={perm}
+                        isChecked={values.permissions.includes(perm)}
+                        onChange={() => {
+                          const newPermissions = values.permissions.includes(
+                            perm,
+                          )
+                            ? values.permissions.filter((p) => p !== perm)
+                            : [...values.permissions, perm];
+                          setFieldValue('permissions', newPermissions);
+                        }}
+                      >
+                        {perm}
+                      </Checkbox>
+                    ))}
+                  </VStack>
+                </FormControl>
+              </ModalBody>
+              <ModalFooter>
+                <Button colorScheme="blue" type="submit">
+                  {isEditing ? 'Update Role' : 'Create Role'}
+                </Button>
+                <Button
+                  onClick={() => {
+                    onClose();
+                    setEditedRole(null);
+                  }}
                 >
-                  {permission}
-                </Checkbox>
-              ))}
-            </VStack>
-          </FormControl>
-        </ModalBody>
-        <ModalFooter>
-          <Button colorScheme="blue" mr={3} onClick={handleCreateRole}>
-            Create Role
-          </Button>
-          <Button onClick={onClose}>Cancel</Button>
-        </ModalFooter>
+                  Cancel
+                </Button>
+              </ModalFooter>
+            </Form>
+          )}
+        </Formik>
       </ModalContent>
     </Modal>
   );
-}
+};
+
+export default CreateRoleForm;
