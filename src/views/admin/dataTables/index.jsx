@@ -55,57 +55,14 @@ export default function Settings() {
     fetchRoles();
   }, []);
 
-  const handleSubmit = async (values) => {
+  // Handle delete role
+  const handleDeleteRole = async (roleId) => {
     try {
-      if (isEditing) {
-        // ✅ Update role
-        const updatedRole = await _update(
-          `/api/roles/${editedRole._id}`,
-          values,
-        );
-
-        // Update the roles list with the updated role
-        setRoles((prevRoles) =>
-          prevRoles.map((role) =>
-            role._id === updatedRole._id ? updatedRole : role,
-          ),
-        );
-
-        toast({
-          title: 'Role updated.',
-          description: 'The role has been successfully updated.',
-          status: 'success',
-          duration: 5000,
-          isClosable: true,
-        });
-      } else {
-        // ✅ Create new role
-        const newRole = await _create('/api/roles', values);
-
-        // Add the new role to the state
-        setRoles((prevRoles) => [...prevRoles, newRole]);
-
-        toast({
-          title: 'Role created.',
-          description: 'A new role has been successfully created.',
-          status: 'success',
-          duration: 5000,
-          isClosable: true,
-        });
-      }
-
-      // Close the modal and reset the form
-      onClose();
-      setEditedRole(null);
+      await _delete('/api/roles/:id', roleId);
+      setRoles((prevRoles) => prevRoles.filter((role) => role._id !== roleId));
     } catch (error) {
-      console.error('Error saving role:', error);
-      toast({
-        title: 'Operation failed.',
-        description: 'Something went wrong. Try again.',
-        status: 'error',
-        duration: 5000,
-        isClosable: true,
-      });
+      console.error('Error deleting role:', error);
+      alert('Failed to delete role. Please try again.');
     }
   };
 
