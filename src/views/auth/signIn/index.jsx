@@ -71,7 +71,7 @@ function SignIn() {
         if (response.data.token) {
           localStorage.setItem("authToken", response.data.token);
           localStorage.setItem("user", JSON.stringify(response.data.user));
-          navigate("/admin/default"); // Redirect to Dashboard
+          navigate("/admin/default"); 
         }
       } catch (error) {
         setErrorMessage(error.response?.data?.message || "Login failed. Please try again.");

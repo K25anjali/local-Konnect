@@ -12,7 +12,7 @@ export default function Main() {
 
   useEffect(() => {
     const token = localStorage.getItem("authToken");
-    setIsAuthenticated(!!token); // If token exists, set true; else false
+    setIsAuthenticated(!!token); 
     setIsLoading(false);
   }, []);
 
