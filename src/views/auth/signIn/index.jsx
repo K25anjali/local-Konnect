@@ -22,7 +22,7 @@ import { MdOutlineRemoveRedEye } from "react-icons/md";
 import { RiEyeCloseLine } from "react-icons/ri";
 import { HSeparator } from "components/separator/Separator";
 import DefaultAuth from "layouts/auth/Default";
-import illustration from "assets/img/auth/auth.png";
+import illustration from "assets/img/layout/Logo.png";
 
 function SignIn() {
   const navigate = useNavigate();
@@ -59,18 +59,23 @@ function SignIn() {
       setErrorMessage("");
 
       try {
-        const response = await axios.post("https://localkonnectbackend.onrender.com/api/users/auth/login", {
-          email: values.email,
-          password: values.password,
-        });
+        const response = await axios.post(
+          "https://localkonnectbackend.onrender.com/api/users/auth/login",
+          {
+            email: values.email,
+            password: values.password,
+          }
+        );
 
         // ✅ If login is successful, store token & redirect
-        localStorage.setItem("authToken", response.data.token);
-        navigate("/admin/default");
+        if (response.data.token) {
+          localStorage.setItem("authToken", response.data.token);
+          localStorage.setItem("user", JSON.stringify(response.data.user));
+          navigate("/admin/default"); // Redirect to Dashboard
+        }
       } catch (error) {
-        setErrorMessage(
-          error.response?.data?.message || "Invalid email or password"
-        );
+        setErrorMessage(error.response?.data?.message || "Login failed. Please try again.");
+        console.log(error);
       } finally {
         setLoading(false);
       }
@@ -144,9 +149,7 @@ function SignIn() {
           </FormControl>
 
           {/* 🔑 Password Field */}
-          <FormControl
-            isInvalid={formik.errors.password && formik.touched.password}
-          >
+          <FormControl isInvalid={formik.errors.password && formik.touched.password}>
             <FormLabel fontSize="sm" fontWeight="500" color={textColor} mb="8px">
               Password<Text color={brandStars}>*</Text>
             </FormLabel>

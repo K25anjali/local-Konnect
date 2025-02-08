@@ -19,7 +19,7 @@ import { ItemContent } from 'components/menu/ItemContent';
 import { SearchBar } from 'components/navbar/searchBar/SearchBar';
 import { SidebarResponsive } from 'components/sidebar/Sidebar';
 import PropTypes from 'prop-types';
-import React from 'react';
+import React ,{useState,useEffect}from 'react';
 // Assets
 import navImage from 'assets/img/layout/Navbar.png';
 import { MdNotificationsNone, MdInfoOutline } from 'react-icons/md';
@@ -43,6 +43,16 @@ export default function HeaderLinks(props) {
     '14px 17px 40px 4px rgba(112, 144, 176, 0.06)',
   );
   const borderButton = useColorModeValue('secondaryGray.500', 'whiteAlpha.200');
+  //  
+  const [email, setEmail] = useState("");
+
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem("user")); 
+    if (user && user.email) {
+      setEmail(user.email);
+    }
+  }, []);
+  console.log(email)
   return (
     <Flex
       w={{ sm: '100%', md: 'auto' }}
@@ -143,7 +153,7 @@ export default function HeaderLinks(props) {
               borderRadius="8px"
               mb="10px"
             >
-              <ItemContent info="Horizon UI Dashboard PRO" />
+              <ItemContent info="Local Connect Dashboard" />
             </MenuItem>
             <MenuItem
               _hover={{ bg: 'none' }}
@@ -152,13 +162,13 @@ export default function HeaderLinks(props) {
               borderRadius="8px"
               mb="10px"
             >
-              <ItemContent info="Horizon Design System Free" />
+              <ItemContent info="Local Connect System" />
             </MenuItem>
           </Flex>
         </MenuList>
       </Menu>
 
-      <Menu>
+      {/* <Menu>
         <MenuButton p="0px">
           <Icon
             mt="6px"
@@ -182,7 +192,7 @@ export default function HeaderLinks(props) {
         >
           <Image src={navImage} borderRadius="16px" mb="28px" />
           <Flex flexDirection="column">
-            <Link w="100%" href="https://horizon-ui.com/pro">
+            <Link w="100%" href="">
               <Button w="100%" h="44px" mb="10px" variant="brand">
                 Buy Horizon UI PRO
               </Button>
@@ -212,7 +222,7 @@ export default function HeaderLinks(props) {
             </Link>
           </Flex>
         </MenuList>
-      </Menu>
+      </Menu> */}
 
       <Button
         variant="no-hover"
@@ -264,7 +274,7 @@ export default function HeaderLinks(props) {
               fontWeight="700"
               color={textColor}
             >
-              👋&nbsp; Hey, Adela
+              👋&nbsp;  Hey, {email ? email : "User"}
             </Text>
           </Flex>
           <Flex flexDirection="column" p="10px">
@@ -285,14 +295,21 @@ export default function HeaderLinks(props) {
               <Text fontSize="sm">Newsletter Settings</Text>
             </MenuItem>
             <MenuItem
-              _hover={{ bg: 'none' }}
-              _focus={{ bg: 'none' }}
-              color="red.400"
-              borderRadius="8px"
-              px="14px"
-            >
-              <Text fontSize="sm">Log out</Text>
-            </MenuItem>
+  _hover={{ bg: 'none' }}
+  _focus={{ bg: 'none' }}
+  color="red.400"
+  borderRadius="8px"
+  px="14px"
+  onClick={() => {
+    console.log("User logged out");
+    localStorage.removeItem("authToken"); 
+    window.location.href = "/auth/sign-in"; 
+   
+  }}
+>
+  <Text fontSize="sm">Log out</Text>
+</MenuItem>
+
           </Flex>
         </MenuList>
       </Menu>
