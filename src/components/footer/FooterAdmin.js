@@ -38,14 +38,14 @@ export default function Footer() {
         {" "}
         &copy; {1900 + new Date().getYear()}
         <Text as='span' fontWeight='500' ms='4px'>
-          Horizon UI. All Rights Reserved. Made with love by
+          Local Koneect. All Rights Reserved. Made with love by
           <Link
             mx='3px'
             color={textColor}
             href='https://www.simmmple.com?ref=horizon-chakra-free'
             target='_blank'
             fontWeight='700'>
-            Simmmple!
+            Local Konnect
           </Link>
         </Text>
       </Text>
@@ -58,7 +58,7 @@ export default function Footer() {
           <Link
             fontWeight='500'
             color={textColor}
-            href='mailto:hello@simmmple.com'>
+            href='m'>
             Support
           </Link>
         </ListItem>
@@ -70,7 +70,7 @@ export default function Footer() {
           <Link
             fontWeight='500'
             color={textColor}
-            href='https://www.simmmple.com/licenses?ref=horizon-chakra-free'>
+            href=''>
             License
           </Link>
         </ListItem>
@@ -82,7 +82,7 @@ export default function Footer() {
           <Link
             fontWeight='500'
             color={textColor}
-            href='https://simmmple.com/terms-of-service?ref=horizon-chakra-free'>
+            href=''>
             Terms of Use
           </Link>
         </ListItem>
@@ -90,7 +90,7 @@ export default function Footer() {
           <Link
             fontWeight='500'
             color={textColor}
-            href='https://www.blog.simmmple.com/?ref=horizon-chakra-free'>
+            href=''>
             Blog
           </Link>
         </ListItem>
