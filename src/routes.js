@@ -11,7 +11,7 @@ import {
 
 // Admin Imports
 import MainDashboard from 'views/admin/default';
-import NFTMarketplace from 'views/admin/marketplace';
+import Team from 'views/admin/team';
 import Profile from 'views/admin/profile';
 import DataTables from 'views/admin/dataTables';
 
@@ -31,7 +31,7 @@ const routes = [
     layout: '/admin',
     path: '/nft-marketplace',
     icon: <Icon as={MdGroups} width="20px" height="20px" color="inherit" />,
-    component: <NFTMarketplace />,
+    component: <Team />,
     secondary: true,
   },
   {
@@ -55,9 +55,8 @@ const routes = [
     icon: <Icon as={MdPerson} width="20px" height="20px" color="inherit" />,
     component: <Profile />,
   },
-  
+
   {
-    
     layout: '/auth',
     path: '/sign-in',
     component: <SignInCentered />,

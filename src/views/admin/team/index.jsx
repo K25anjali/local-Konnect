@@ -18,7 +18,7 @@ import {
   useColorModeValue,
   useDisclosure,
   IconButton,
-  useToast, // <-- Added this import
+  useToast,
 } from '@chakra-ui/react';
 import {
   createColumnHelper,
@@ -31,30 +31,30 @@ import { EditIcon, DeleteIcon, ViewIcon } from '@chakra-ui/icons';
 import Card from 'components/card/Card';
 import Menu from 'components/menu/MainMenu';
 import { _fetch, _update, _delete } from 'components/utils/apiUtils';
-import CreateRoleForm from './components/CreateRoleForm';
+import CreateTeamForm from './CreateTeamForm';
 
 const columnHelper = createColumnHelper();
 
-export default function Settings() {
+export default function TeamManagement() {
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const [roles, setRoles] = useState([]);
-  const [editedRole, setEditedRole] = useState({});
+  const [teamMembers, setTeamMembers] = useState([]);
+  const [editedTeamMember, setEditedTeamMember] = useState({});
   const [isEditing, setIsEditing] = useState(false);
-  const [isPreview, setIsPreview] = useState(false);
+  const [isPreviewing, setIsPreviewing] = useState(false);
   const textColor = useColorModeValue('secondaryGray.900', 'white');
   const borderColor = useColorModeValue('gray.200', 'whiteAlpha.100');
-  const toast = useToast(); // <-- Added toast hook
+  const toast = useToast();
 
   useEffect(() => {
-    const fetchRoles = async () => {
+    const fetchTeamMembers = async () => {
       try {
-        const response = await _fetch('/api/roles/');
-        setRoles(response.roles);
+        const response = await _fetch('/api/roles/users');
+        setTeamMembers(response.users);
       } catch (error) {
         toast({
-          title: 'Failed to fetch roles',
+          title: 'Failed to fetch teamMembers',
           description:
-            'There was an error fetching the roles. Please try again.',
+            'There was an error fetching the teamMembers. Please try again.',
           status: 'error',
           duration: 5000,
           isClosable: true,
@@ -62,13 +62,15 @@ export default function Settings() {
       }
     };
 
-    fetchRoles();
+    fetchTeamMembers();
   }, []);
 
-  const handleDeleteRole = async (roleId) => {
+  const handleDeleteTeamMember = async (teamMemberId) => {
     try {
-      await _delete('/api/roles/:id', roleId);
-      setRoles((prevRoles) => prevRoles.filter((role) => role._id !== roleId));
+      await _delete('/api/teamMembers/:id', teamMemberId);
+      setTeamMembers((prevTeamMembers) =>
+        prevTeamMembers.filter((teamMember) => teamMember._id !== teamMemberId),
+      );
       toast({
         title: 'Role deleted',
         description: 'The role has been successfully deleted.',
@@ -87,26 +89,26 @@ export default function Settings() {
     }
   };
 
-  const handleEditClick = (role) => {
+  const handleEditTeamMember = (teamMember) => {
     onOpen();
-    setEditedRole(role);
+    setEditedTeamMember(teamMember);
     setIsEditing(true);
-    setIsPreview(false);
+    setIsPreviewing(false);
   };
 
-  const handlePreview = (role) => {
+  const handlePreviewTeamMember = (teamMember) => {
     onOpen();
-    setEditedRole(role);
+    setEditedTeamMember(teamMember);
     setIsEditing(false);
-    setIsPreview(true);
+    setIsPreviewing(true);
   };
 
   const columns = [
-    columnHelper.accessor('title', {
-      id: 'title',
+    columnHelper.accessor('name', {
+      id: 'name',
       header: () => (
         <Text fontSize="12px" color="gray.400">
-          TITLE
+          Name
         </Text>
       ),
       cell: (info) => (
@@ -115,11 +117,11 @@ export default function Settings() {
         </Text>
       ),
     }),
-    columnHelper.accessor('description', {
-      id: 'description',
+    columnHelper.accessor('email', {
+      id: 'email',
       header: () => (
         <Text fontSize="12px" color="gray.400">
-          DESCRIPTION
+          Email
         </Text>
       ),
       cell: (info) => (
@@ -128,28 +130,30 @@ export default function Settings() {
         </Text>
       ),
     }),
-    columnHelper.accessor('userPermissions', {
-      id: 'permissions',
+    columnHelper.accessor('phoneMember', {
+      id: 'phoneMember',
       header: () => (
         <Text fontSize="12px" color="gray.400">
-          Permissions
+          Phone Member
         </Text>
       ),
       cell: (info) => (
-        <Flex wrap="wrap">
-          {info.getValue().map((permission, index) => (
-            <Tag
-              key={index}
-              border="1px"
-              borderColor="gray.300"
-              mr="2"
-              size="sm"
-              mb="2"
-            >
-              <TagLabel>{permission}</TagLabel>
-            </Tag>
-          ))}
-        </Flex>
+        <Text color={textColor} fontSize="sm">
+          {info.getValue()}
+        </Text>
+      ),
+    }),
+    columnHelper.accessor('userType', {
+      id: 'userType',
+      header: () => (
+        <Text fontSize="12px" color="gray.400">
+          User Type
+        </Text>
+      ),
+      cell: (info) => (
+        <Text color={textColor} fontSize="sm">
+          {info.getValue()}
+        </Text>
       ),
     }),
     {
@@ -160,7 +164,7 @@ export default function Settings() {
         </Text>
       ),
       cell: (info) => {
-        const role = info.row.original;
+        const teamMember = info.row.original;
         return (
           <Flex>
             <IconButton
@@ -168,7 +172,7 @@ export default function Settings() {
               icon={<EditIcon />}
               aria-label="Edit"
               size="sm"
-              onClick={() => handleEditClick(role)}
+              onClick={() => handleEditTeamMember(teamMember)}
             />
             <IconButton
               colorScheme="red"
@@ -176,7 +180,7 @@ export default function Settings() {
               aria-label="Delete"
               size="sm"
               ml={2}
-              onClick={() => handleDeleteRole(role._id)}
+              onClick={() => handleDeleteTeamMember(teamMember._id)}
             />
             <IconButton
               colorScheme="green"
@@ -184,7 +188,7 @@ export default function Settings() {
               aria-label="Preview"
               size="sm"
               ml={2}
-              onClick={() => handlePreview(role)}
+              onClick={() => handlePreviewTeamMember(teamMember)}
             />
           </Flex>
         );
@@ -193,7 +197,7 @@ export default function Settings() {
   ];
 
   const table = useReactTable({
-    data: roles,
+    data: teamMembers,
     columns,
     state: {},
     getCoreRowModel: getCoreRowModel(),
@@ -211,13 +215,13 @@ export default function Settings() {
             onOpen();
           }}
         >
-          Add Role
+          Add Team
         </Button>
       </Box>
       <Card flexDirection="column" w="100%" px="0px" overflowX="auto">
         <Flex px="25px" mb="8px" justifyContent="space-between" align="center">
           <Text color={textColor} fontSize="22px" fontWeight="700">
-            Role Management
+            Team Management
           </Text>
           <Menu />
         </Flex>
@@ -254,13 +258,13 @@ export default function Settings() {
           </Table>
         </Box>
       </Card>
-      <CreateRoleForm
+      <CreateTeamForm
         isOpen={isOpen}
         onClose={onClose}
-        setRoles={setRoles}
+        setTeamMembers={setTeamMembers}
         isEditing={isEditing}
-        editedRole={editedRole}
-        isPreview={isPreview}
+        editedTeamMember={editedTeamMember}
+        isPreviewing={isPreviewing}
       />
     </Box>
   );
