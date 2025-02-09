@@ -13,8 +13,15 @@ import {
   Tr,
   Input,
   Button,
-  Tag,
-  TagLabel,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  FormControl,
+  FormLabel,
+  Select,
   useColorModeValue,
   useDisclosure,
   IconButton,
@@ -30,25 +37,43 @@ import {
 import { EditIcon, DeleteIcon, ViewIcon } from '@chakra-ui/icons';
 import Card from 'components/card/Card';
 import Menu from 'components/menu/MainMenu';
-import { _fetch, _update, _delete } from 'components/utils/apiUtils';
-import CreateTeamForm from './CreateTeamForm';
+import { Formik, Field, Form } from 'formik';
+import * as Yup from 'yup';
+import { _create, _fetch, _update, _delete } from 'components/utils/apiUtils';
 
 const columnHelper = createColumnHelper();
+
+const validationSchema = Yup.object({
+  fullName: Yup.string().required('Name is required'),
+  email: Yup.string().email('Invalid email').required('Email is required'),
+  phone: Yup.string().required('Phone number is required'),
+  role: Yup.string().required('User type is required'),
+});
 
 export default function TeamManagement() {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [teamMembers, setTeamMembers] = useState([]);
-  const [editedTeamMember, setEditedTeamMember] = useState({});
+  const [selectedTeamMember, setSelectedTeamMember] = useState({});
   const [isEditing, setIsEditing] = useState(false);
-  const [isPreviewing, setIsPreviewing] = useState(false);
+  const [isPreview, setIsPreview] = useState(false);
+  const [roles, setRoles] = useState([]);
+
   const textColor = useColorModeValue('secondaryGray.900', 'white');
   const borderColor = useColorModeValue('gray.200', 'whiteAlpha.100');
   const toast = useToast();
 
+  // Initial values for creating a new role
+  const initialValues = {
+    fullName: '',
+    email: '',
+    phone: '',
+    role: '',
+  };
+
   useEffect(() => {
     const fetchTeamMembers = async () => {
       try {
-        const response = await _fetch('/api/roles/users');
+        const response = await _fetch('/api/admin-team/');
         setTeamMembers(response.users);
       } catch (error) {
         toast({
@@ -65,22 +90,76 @@ export default function TeamManagement() {
     fetchTeamMembers();
   }, []);
 
+  useEffect(() => {
+    const fetchRoles = async () => {
+      try {
+        const response = await _fetch('/api/roles/');
+        setRoles(response.roles || []);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    fetchRoles();
+  }, []);
+
+  const handleSubmit = async (values, { resetForm }) => {
+    if (isPreview) return;
+
+    try {
+      if (isEditing) {
+        await _update(`/api/admin-team/${selectedTeamMember._id}`, values);
+        setRoles((prevRoles) =>
+          prevRoles.map((role) =>
+            role._id === selectedTeamMember._id ? { ...role, ...values } : role,
+          ),
+        );
+        toast({
+          title: 'Role updated.',
+          description: 'The team member has been successfully updated.',
+          status: 'success',
+          duration: 5000,
+          isClosable: true,
+        });
+      } else {
+        const newRole = await _create('/api/admin-team/', values);
+        setRoles((prevRoles) => [...prevRoles, newRole.role]);
+        toast({
+          title: 'Team member created.',
+          description: 'A new team member has been successfully created.',
+          status: 'success',
+          duration: 5000,
+          isClosable: true,
+        });
+      }
+      resetForm();
+      onClose();
+    } catch (error) {
+      toast({
+        title: 'Operation failed.',
+        description: 'Something went wrong. Try again.',
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      });
+    }
+  };
+
   const handleDeleteTeamMember = async (teamMemberId) => {
     try {
-      await _delete('/api/teamMembers/:id', teamMemberId);
+      await _delete('/api/admin-team/:id', teamMemberId);
       setTeamMembers((prevTeamMembers) =>
         prevTeamMembers.filter((teamMember) => teamMember._id !== teamMemberId),
       );
       toast({
-        title: 'Role deleted',
-        description: 'The role has been successfully deleted.',
+        title: 'Team member deleted',
+        description: 'Team member has been successfully deleted.',
         status: 'success',
         duration: 5000,
         isClosable: true,
       });
     } catch (error) {
       toast({
-        title: 'Failed to delete role',
+        title: 'Failed to delete team member',
         description: 'There was an error deleting the role. Please try again.',
         status: 'error',
         duration: 5000,
@@ -91,16 +170,16 @@ export default function TeamManagement() {
 
   const handleEditTeamMember = (teamMember) => {
     onOpen();
-    setEditedTeamMember(teamMember);
+    setSelectedTeamMember(teamMember);
     setIsEditing(true);
-    setIsPreviewing(false);
+    setIsPreview(false);
   };
 
   const handlePreviewTeamMember = (teamMember) => {
     onOpen();
-    setEditedTeamMember(teamMember);
+    setSelectedTeamMember(teamMember);
     setIsEditing(false);
-    setIsPreviewing(true);
+    setIsPreview(true);
   };
 
   const columns = [
@@ -212,6 +291,7 @@ export default function TeamManagement() {
           colorScheme="blue"
           onClick={() => {
             setIsEditing(false);
+            setIsPreview(false);
             onOpen();
           }}
         >
@@ -258,14 +338,90 @@ export default function TeamManagement() {
           </Table>
         </Box>
       </Card>
-      <CreateTeamForm
+      <Modal
         isOpen={isOpen}
-        onClose={onClose}
-        setTeamMembers={setTeamMembers}
-        isEditing={isEditing}
-        editedTeamMember={editedTeamMember}
-        isPreviewing={isPreviewing}
-      />
+        onClose={() => {
+          onClose();
+        }}
+      >
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>
+            {isPreview
+              ? 'Preview Team Member'
+              : isEditing
+              ? 'Edit Team Member'
+              : 'Create New Team'}
+          </ModalHeader>
+          <Formik
+            initialValues={{
+              fullName: selectedTeamMember?.fullName || '',
+              email: selectedTeamMember?.email || '',
+              phone: selectedTeamMember?.phone || '',
+              role: selectedTeamMember?.role || '',
+            }}
+            validationSchema={validationSchema}
+            onSubmit={handleSubmit}
+            enableReinitialize
+          >
+            {({ resetForm }) => (
+              <Form>
+                <ModalBody>
+                  <FormControl mb={4}>
+                    <FormLabel>Full Name</FormLabel>
+                    <Field as={Input} name="fullName" isReadOnly={isPreview} />
+                  </FormControl>
+                  <FormControl mb={4}>
+                    <FormLabel>Email</FormLabel>
+                    <Field as={Input} name="email" isReadOnly={isPreview} />
+                  </FormControl>
+                  <FormControl mb={4}>
+                    <FormLabel>Phone Number</FormLabel>
+                    <Field as={Input} name="phone" isReadOnly={isPreview} />
+                  </FormControl>
+                  <FormControl mb={4}>
+                    <FormLabel>Role</FormLabel>
+                    <Field as={Select} name="role" isReadOnly={isPreview}>
+                      <option value="">Select Role</option>
+                      {roles.map((role) => (
+                        <option key={role._id} value={role.name}>
+                          {role.title}
+                        </option>
+                      ))}
+                    </Field>
+                  </FormControl>
+                </ModalBody>
+                <ModalFooter>
+                  {isPreview ? (
+                    <Button
+                      onClick={() => {
+                        resetForm();
+                        onClose();
+                      }}
+                    >
+                      Close
+                    </Button>
+                  ) : (
+                    <>
+                      <Button colorScheme="blue" type="submit">
+                        {isEditing ? 'Update Team' : 'Create Team'}
+                      </Button>
+                      <Button
+                        onClick={() => {
+                          resetForm();
+                          onClose();
+                        }}
+                      >
+                        Cancel
+                      </Button>
+                    </>
+                  )}
+                </ModalFooter>
+              </Form>
+            )}
+          </Formik>
+        </ModalContent>
+      </Modal>
     </Box>
   );
 }
