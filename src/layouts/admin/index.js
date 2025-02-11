@@ -16,21 +16,36 @@ export default function Dashboard(props) {
   const { onOpen } = useDisclosure();
 
   const getActiveRoute = (routes) => {
-    for (let i = 0; i < routes.length; i++) {
-      if (routes[i].collapse) {
-        let collapseActiveRoute = getActiveRoute(routes[i].items);
-        if (collapseActiveRoute) return collapseActiveRoute;
-      } else if (routes[i].category) {
-        let categoryActiveRoute = getActiveRoute(routes[i].items);
-        if (categoryActiveRoute) return categoryActiveRoute;
-      } else {
-        if (location.pathname === routes[i].layout + routes[i].path) {
-          return routes[i].name;
+    let activeRoute = "Page Not Found";
+    const currentPath = window.location.pathname;
+  
+    console.log("Current Path:", currentPath); // 🔍 Debugging current URL
+  
+    routes.forEach((route) => {
+      // 1️⃣ Check nested routes
+      if (route.collapse && route.items) {
+        const nestedRoute = getActiveRoute(route.items);
+        if (nestedRoute !== "Page Not Found") {
+          activeRoute = nestedRoute;
         }
       }
-    }
-    return 'Default Brand Text';
+  
+      // 2️⃣ Check direct match
+      const fullPath = route.layout ? `${route.layout}${route.path}` : route.path;
+      
+      console.log("Checking Route:", fullPath, "Against:", currentPath); // 🔍 Debugging route checking
+  
+      if (currentPath === fullPath) {
+        activeRoute = route.name;
+        console.log("Matched Route:", activeRoute); // ✅ Confirm matched route
+      }
+    });
+  
+    return activeRoute;
   };
+  
+  
+  
 
   const getActiveNavbarText = (routes) => {
     for (let i = 0; i < routes.length; i++) {
@@ -48,18 +63,19 @@ export default function Dashboard(props) {
     }
     return '';
   };
-
   const getRoutes = (routes) => {
-    return routes.map((route, key) => {
-      if (route.layout === '/admin') {
+    return routes.flatMap((route, key) => {
+      if (route.component) {
         return <Route path={route.path} element={route.component} key={key} />;
       }
-      if (route.collapse) {
-        return getRoutes(route.items);
+      if (route.collapse && route.items) {
+        return getRoutes(route.items); // 🔥 Nested submenu routes bhi include honge
       }
-      return null;
+      return [];
     });
   };
+  
+  
 
   return (
     <Box>
@@ -76,16 +92,17 @@ export default function Dashboard(props) {
           maxWidth={{ base: '100%', xl: 'calc( 100% - 290px )' }}
           transition="all 0.33s cubic-bezier(0.685, 0.0473, 0.346, 1)"
         >
-          <Portal>
-            <Navbar
-              onOpen={onOpen}
-              logoText={'Horizon UI Dashboard PRO'}
-              brandText={getActiveRoute(routes)}
-              message={getActiveNavbarText(routes)}
-              fixed={fixed}
-              {...rest}
-            />
-          </Portal>
+         <Portal>
+  <Navbar
+    onOpen={onOpen}
+    logoText={'Horizon UI Dashboard PRO'}
+    brandText={getActiveRoute(routes)}  // Dynamically updates header
+    message={getActiveNavbarText(routes)}
+    fixed={fixed}
+    {...rest}
+  />
+</Portal>
+
 
           <Box mx="auto" p={{ base: '20px', md: '30px' }} pe="20px" minH="100vh" pt="50px">
             <Routes>
