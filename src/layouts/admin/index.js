@@ -64,16 +64,27 @@ export default function Dashboard(props) {
     return '';
   };
   const getRoutes = (routes) => {
-    return routes.flatMap((route, key) => {
+    let allRoutes = [];
+  
+    routes.forEach((route, key) => {
       if (route.component) {
-        return <Route path={route.path} element={route.component} key={key} />;
+        allRoutes.push(<Route path={route.path} element={route.component} key={key} />);
       }
+  
       if (route.collapse && route.items) {
-        return getRoutes(route.items); // 🔥 Nested submenu routes bhi include honge
+        route.items.forEach((item, index) => {
+          if (item.component) {
+            allRoutes.push(
+              <Route path={item.path} element={item.component} key={`${key}-${index}`} />
+            );
+          }
+        });
       }
-      return [];
     });
+  
+    return allRoutes;
   };
+  
   
   
 
@@ -95,8 +106,8 @@ export default function Dashboard(props) {
          <Portal>
   <Navbar
     onOpen={onOpen}
-    logoText={'Horizon UI Dashboard PRO'}
-    brandText={getActiveRoute(routes)}  // Dynamically updates header
+    logoText={''}
+    brandText={getActiveRoute(routes)}  
     message={getActiveNavbarText(routes)}
     fixed={fixed}
     {...rest}
@@ -107,7 +118,6 @@ export default function Dashboard(props) {
           <Box mx="auto" p={{ base: '20px', md: '30px' }} pe="20px" minH="100vh" pt="50px">
             <Routes>
               {getRoutes(routes)}
-              <Route path="/" element={<Navigate to="/admin/default" replace />} />
             </Routes>
           </Box>
           <Footer />

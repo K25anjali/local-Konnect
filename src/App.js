@@ -32,6 +32,7 @@ export default function Main() {
           path="auth/*"
           element={isAuthenticated ? <Navigate to="/admin/default" replace /> : <AuthLayout />}
         />
+        
 
         {/* Admin Routes (With Sidebar) */}
         <Route

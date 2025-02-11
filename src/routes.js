@@ -21,6 +21,12 @@ import {
 } from 'react-icons/md';
 import MainDashboard from 'views/admin/default';
 import ActiveTask from 'views/admin/ourApplication/activetask'
+import CompletedTask from 'views/admin/ourApplication/completedtask'
+import PendingTask from 'views/admin/ourApplication/pendingtask'
+import Invoices from 'views/admin/ourApplication/invoices'
+import Categories from 'views/admin/ourApplication/categories'
+import Community from 'views/admin/ourApplication/community'
+import FAQS from 'views/admin/faqs'
 const routes = [
   {
     name: 'Dashboard',
@@ -36,11 +42,11 @@ const routes = [
     collapse: true,
     items: [
       { name: 'Active Task', path: '/active-task', component: <ActiveTask />  },
-      { name: 'Completed Task', path: '/completed-task' },
-      { name: 'Pending Task', path: '/pending-task' },
-      { name: 'Invoices', path: '/invoices' },
-      { name: 'Categories', path: '/categories' },
-      { name: 'Community', path: '/community' },
+      { name: 'Completed Task', path: '/completed-task' ,component: <CompletedTask />},
+      { name: 'Pending Task', path: '/pending-task',component: <PendingTask /> },
+      { name: 'Invoices', path: '/invoices',component: <Invoices /> },
+      { name: 'Categories', path: '/categories' ,component: <Categories />},
+      { name: 'Community', path: '/community' ,component: <Community />},
       { name: 'Category Pricing', path: '/category-pricing' },
       { name: 'Category Attributes', path: '/category-attributes' },
     ],
@@ -69,7 +75,7 @@ const routes = [
     
     ],
   },
-  { name: 'FAQs', layout: '/admin', path: '/faqs', icon: <Icon as={MdHelp} width="20px" height="20px" color="inherit" /> },
+  { name: 'FAQs', layout: '/admin', path: '/faqs', icon: <Icon as={MdHelp} width="20px" height="20px" color="inherit" /> ,component: <FAQS /> },
   { name: 'Newsletters', layout: '/admin', path: '/newsletters', icon: <Icon as={MdEmail} width="20px" height="20px" color="inherit" /> },
   { name: 'Location', layout: '/admin', path: '/location', icon: <Icon as={MdLocationOn} width="20px" height="20px" color="inherit" /> },
   { name: 'Reports', layout: '/admin', path: '/reports', icon: <Icon as={MdReport} width="20px" height="20px" color="inherit" /> },
