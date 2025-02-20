@@ -3,6 +3,7 @@ import { Box, Breadcrumb, BreadcrumbItem, BreadcrumbLink, Flex, Link, Text, useC
 import PropTypes from 'prop-types';
 import React, { useState, useEffect } from 'react';
 import AdminNavbarLinks from 'components/navbar/NavbarLinksAdmin';
+import RefreshButton from 'components/RefreshButton';
 
 export default function AdminNavbar(props) {
 	const [ scrolled, setScrolled ] = useState(false);
@@ -88,38 +89,9 @@ export default function AdminNavbar(props) {
 				alignItems={{ xl: 'center' }}
 				mb={gap}>
 				<Box mb={{ sm: '8px', md: '0px' }}>
-					<Breadcrumb>
-						<BreadcrumbItem color={secondaryText} fontSize='sm' mb='5px'>
-							<BreadcrumbLink href='#' color={secondaryText}>
-								Pages
-							</BreadcrumbLink>
-						</BreadcrumbItem>
-
-						<BreadcrumbItem color={secondaryText} fontSize='sm' mb='5px'>
-							<BreadcrumbLink href='#' color={secondaryText}>
-								{brandText}
-							</BreadcrumbLink>
-						</BreadcrumbItem>
-					</Breadcrumb>
-					{/* Here we create navbar brand, based on route name */}
-					<Link
-						color={mainText}
-						href='#'
-						bg='inherit'
-						borderRadius='inherit'
-						fontWeight='bold'
-						fontSize='34px'
-						_hover={{ color: { mainText } }}
-						_active={{
-							bg: 'inherit',
-							transform: 'none',
-							borderColor: 'transparent'
-						}}
-						_focus={{
-							boxShadow: 'none'
-						}}>
-						{brandText}
-					</Link>
+					
+					
+					
 				</Box>
 				<Box ms='auto' w={{ sm: '100%', md: 'unset' }}>
 					<AdminNavbarLinks

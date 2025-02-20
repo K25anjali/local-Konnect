@@ -12,17 +12,14 @@ import {
   MdReport,
   MdSettings,
   MdPayment,
-  MdCategory,
-  MdPriceChange,
-  MdOutlineTask,
-  MdAttachMoney,
-  MdRequestPage,
+ 
   MdContacts,
+  MdSms,
+  MdBook,
 } from 'react-icons/md';
 import MainDashboard from 'views/admin/default';
-import ActiveTask from 'views/admin/ourApplication/activetask'
-import CompletedTask from 'views/admin/ourApplication/completedtask'
-import PendingTask from 'views/admin/ourApplication/pendingtask'
+import Bookings from 'views/admin/ourApplication/bookings'
+
 import Invoices from 'views/admin/ourApplication/invoices'
 import Categories from 'views/admin/ourApplication/categories'
 import Community from 'views/admin/ourApplication/community'
@@ -36,14 +33,22 @@ const routes = [
     component: <MainDashboard /> 
   },
   {
+    name: 'Bookings',
+    layout: '/admin',
+    icon: <Icon as={MdBook} width="20px" height="20px" color="inherit" />,
+    collapse: true,
+    items: [
+      { name: 'Bookings', path: '/bookings', component: <Bookings />  },
+     
+    ],
+  },
+  {
     name: 'Our Application',
     layout: '/admin',
     icon: <Icon as={MdAssignment} width="20px" height="20px" color="inherit" />,
     collapse: true,
     items: [
-      { name: 'Active Task', path: '/active-task', component: <ActiveTask />  },
-      { name: 'Completed Task', path: '/completed-task' ,component: <CompletedTask />},
-      { name: 'Pending Task', path: '/pending-task',component: <PendingTask /> },
+      
       { name: 'Invoices', path: '/invoices',component: <Invoices /> },
       { name: 'Categories', path: '/categories' ,component: <Categories />},
       { name: 'Community', path: '/community' ,component: <Community />},
@@ -106,11 +111,22 @@ const routes = [
     icon: <Icon as={MdPayment} width="20px" height="20px" color="inherit" />,
     collapse: true,
     items: [
+      { name: 'Payment Gateway', path: '/payment-gateway' },
       { name: 'Completed Transactions', path: '/completed-transactions' },
       { name: 'Failed Transactions', path: '/failed-transactions' },
       { name: 'Pending Transactions', path: '/pending-transactions' },
       { name: 'Payout Request', path: '/payout-request' },
       { name: 'Refund Request', path: '/refund-request' },
+    ],
+  },
+  {
+    name: 'SMS Gateway',
+    layout: '/admin',
+    icon: <Icon as={MdSms} width="20px" height="20px" color="inherit" />,
+    collapse: true,
+    items: [
+      { name: 'SMS Gateway', path: '/sms-gateway' },
+      { name: 'SMS logs', path: '/sms-logs' },
     ],
   },
 ];

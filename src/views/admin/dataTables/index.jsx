@@ -389,7 +389,7 @@ export default function Settings() {
                                 : [...values.userPermissions, perm];
                             setFieldValue('userPermissions', newPermissions);
                           }}
-                          isDisabled={isPreview} // Disable checkboxes in preview mode
+                          isDisabled={isPreview} 
                         >
                           {perm}
                         </Checkbox>

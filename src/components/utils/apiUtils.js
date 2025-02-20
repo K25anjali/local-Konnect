@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Base URL for the API
-export const BASE_URL = 'https://localkonnectbackend.onrender.com';
+export const BASE_URL = 'https://67b0320fdffcd88a67889a78.mockapi.io/api';
 
 // Function to get authorization headers
 const getAuthHeaders = () => {
